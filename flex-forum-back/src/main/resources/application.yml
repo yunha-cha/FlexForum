@@ -1,0 +1,68 @@
+
+file:
+#      upload-dir: /home/ubuntu/uploads/flex-forum/files
+#      download-url: http://13.209.32.8:8080/download/
+  upload-dir: C:\uploads\my-file-server\files
+  download-url: http://localhost:8080/download/
+setting:
+  allow-origin: http://localhost:3000
+#  allow-origin: http://13.209.32.8
+
+# server port config
+server:
+  port: 8080  # server port
+  tomcat:
+    max-http-form-post-size: 51200MB
+# db config
+spring:
+  main:
+    banner-mode: off
+  servlet:
+    multipart:
+      max-file-size: 51200MB
+      max-request-size: 51200MB
+  jwt:
+    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaayunhabbbbbbb
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver         # db driver
+    url: jdbc:mariadb://13.209.32.8:3306/yunha             # db url
+    username: yunha                  # db username
+    password: MwuwN1MBCHF4QIROygp8aHnmdfJ224ll4zvO4HVp5vLP2b7UTM                     # db password
+
+    hikari:
+      data-source-properties:
+        serverTimezone: Asia/Seoul
+
+  devtools:
+    restart:
+      enabled: false # auto restart option enabled
+
+  jackson:
+    time-zone: Asia/Seoul
+
+
+  # jpa config
+  jpa:
+    hibernate:
+      ddl-auto: none      # none
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+
+
+
+
+
+# Logging Level
+logging:
+  level:
+    root: info
+#    org.springframework.web.servlet.resource: TRACE
+#    org.springframework.security: DEBUG
+#    org.springframework.web: TRACE
+
+
+
+
