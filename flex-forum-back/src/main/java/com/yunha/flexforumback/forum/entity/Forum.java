@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,16 +31,13 @@ public class Forum {
 
     @JoinColumn(name = "user_code")
     @ManyToOne
-    private User user;
+    private User user;      // Long userCode로 대공사
 
-//    @OneToMany(mappedBy = "forum")
-//    private List<Comment> commentList;
-//
-//    @OneToMany(mappedBy = "forum")
-//    private List<Attachment> attachmentList;
+    @OneToMany(mappedBy = "forum", fetch = FetchType.LAZY)
+    private List<Comment> commentList;
 
-//    @OneToMany(mappedBy = "forum")
-//    private List<ForumRecommend> forumRecommendList;
+    @OneToMany(mappedBy = "forum", fetch = FetchType.LAZY)
+    private List<ForumRecommend> forumRecommendList;
 
     @Column(name = "create_at")
     private LocalDateTime createAt;
@@ -53,7 +51,16 @@ public class Forum {
     @Column(name = "ip_address")
     private String ipAddress;
 
-
+    public Forum(Long forumCode, String title, String content, User user, LocalDateTime createAt, int views, String status, String ipAddress) {
+        this.forumCode = forumCode;
+        this.title = title;
+        this.content = content;
+        this.user = user;
+        this.createAt = createAt;
+        this.views = views;
+        this.status = status;
+        this.ipAddress = ipAddress;
+    }
     // 등록
 
 }

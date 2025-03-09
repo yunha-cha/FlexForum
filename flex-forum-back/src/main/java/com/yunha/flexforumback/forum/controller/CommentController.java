@@ -57,4 +57,14 @@ public class CommentController {
         return ResponseEntity.ok().body(commentService.removeComment(commentCode));
     }
 
+
+
+    /* 댓글 좋아요 */
+    @PostMapping("/{commentCode}/recommend")
+    public ResponseEntity<String> recommendComment(@AuthenticationPrincipal CustomUserDetails user ,@PathVariable Long commentCode){
+
+        return ResponseEntity.ok().body(commentService.recommendComment(user.getUserCode(), commentCode));
+    }
+
+
 }

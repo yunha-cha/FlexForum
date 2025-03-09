@@ -66,7 +66,6 @@ api.interceptors.response.use(
         } else if (error.request) {
             // 요청 전 에러 발생
             alert('서버와 통신에 문제가 생겼습니다. 콘솔을 확인하세요.');
-            window.location.href = '/not'
             console.log('서버와 통신이 불가능합니다. :', error);
         } else {
             // 요청 자체를 못했을 때

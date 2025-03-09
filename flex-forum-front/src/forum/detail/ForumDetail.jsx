@@ -19,7 +19,6 @@ const ForumDetail = () => {
     const my = getUser();   //나
     
     const [page, setPage] = useState(0);
-    const [isRecommend, setIsRecommend] = useState(false);
 
     const [hasMore, setHasMore] = useState(true);
     const loader = useRef(null);
@@ -33,6 +32,8 @@ const ForumDetail = () => {
         content: "",
         ip_address: "",
     });
+
+    const [commentCounts, setCommentCounts] = useState(0);
 
 
     // 댓글 onInput 변화 감지 함수
@@ -51,6 +52,7 @@ const ForumDetail = () => {
         
         const res = await api.get(`/forum/${code}`);
         setForum(res.data);
+        console.log(res.data);
 
     }, [code]);
 
@@ -71,23 +73,18 @@ const ForumDetail = () => {
 
     // 댓글 조회 요청
     const getCommentList = useCallback(async () => {
-
+        
         if (!hasMore) return;
-
         try{
             
             const res = await api.get(`/comment/${code}?page=${page}`);
             res.data.last && setHasMore(false);
 
-            console.log(res.data.content);
-            console.log("hasMore: ", hasMore);
-            console.log("page: ", page);
-            console.log("code: ", code)
-            
-            setComments((comments) => [...comments, ...res.data.content] ); // 바보다
+            setComments((comments) => [...comments, ...res.data.content] );
             setPage((page) => page+1);
 
-            
+            setCommentCounts(res.data.totalElements);  //    페이징 응답 객체 속성에서 가져옴
+            console.log(res);
             
         }catch (err){
             console.log("error: ", err);
@@ -136,8 +133,11 @@ const ForumDetail = () => {
             });
         } catch (err) {
             console.log(err);
+        } finally {
+            
+            const res = await api.get(`/comment/${code}?page=${0}`);
+            setComments(res.data.content); // 바보다
         }
-        getCommentList();
     }
 
 
@@ -193,31 +193,32 @@ const ForumDetail = () => {
 
     /* 게시글 추천하기 */
     const handleForumRecommend = async () => {
-        console.log(isRecommend);
-        
-        try{
-            if(!isRecommend){
-                const res = await api.post(`/forum/${code}/recommend`);
-                console.log("추천 완료!:  ", res);
-            }else{
-                const res = await api.delete(`/forum/${code}/recommend`);
-                console.log("추천 삭제!: ", res);
-                
-            }
-        } catch (e){
-            console.log("추천 error: ", e);
-        }
+
+            const res = await api.post(`/forum/${code}/recommend`);
+            console.log(res);
+            
+
     }
 
 
-    // 좋아요 상태 불러오기
-    
+    // 댓글 추천하기
+    const handleCommentRecommend = async(commentCode) => {
+        try{
+            await api.post(`/comment/${commentCode}/recommend`);
+
+        }catch (e) {
+
+            console.log(e);
+            
+        }
+
+    }
+
 
 
     useEffect(() => {
 
-        // 좋아요 호출
-        
+        // getCommentList() 쓰면 2번 호출
 
     }, [])
 
@@ -265,17 +266,20 @@ const ForumDetail = () => {
             </div>
 
             <div className={s.containerFooter}>
-                <span className={s.recommendIcon} onClick={() => setIsRecommend(ir => !ir) } >
-                { isRecommend ? 
-                <FaHeart style={{color: "#66a1ff", marginRight: "1em", width: "28px", height: "28px", cursor: "pointer"}} /> 
+                <div className={s.recommendIcon}  >
+                { forum.isRecommend ? 
+                <FaHeart 
+                style={{color: "#66a1ff", marginRight: "1em", width: "28px", height: "28px", cursor: "pointer"}} 
+                onClick={() => {setForum(p=>({...p,isRecommend:!p.isRecommend})); handleForumRecommend(); }}
+                /> 
                 : 
                 <FontAwesomeIcon icon={faHeart} 
-                onClick={() => handleForumRecommend() }
+                onClick={() => {setForum(p=>({...p,isRecommend:!p.isRecommend})); handleForumRecommend(); }}
                 style={{color: "#66a1ff", marginRight: "1em", width: "30px", height: "30px", cursor: "pointer"}} />
 
                 }    
-                </span>
-                <div style={{ marginRight: "1em" }}>댓글 <b>{comments.length}</b></div>
+                </div>
+                <div style={{ marginRight: "1em" }}>댓글 <b>{commentCounts}</b></div>
                 <div>조회수 <b>{forum?.views ? forum.views+1 : 0}</b></div>
             </div>
 
@@ -297,10 +301,22 @@ const ForumDetail = () => {
                 {comments?.map((comment, idx) => (
                     <div className={s.comment} key={idx}>
                         <div className={s.commentHeader}>
-                            <div style={comment.user.id === '관리자' ? { color: 'red' } : {}}>{comment.user.userId}</div>
+                            <div style={comment?.user?.id === '관리자' ? { color: 'red' } : {}}>{comment?.user?.userId}</div>
                             <div style={{ marginLeft: "0.5em", marginRight: "0.5em" }}>•</div>
                             <div className={s.commentDate}> {comment.createAt && formattedDate(comment.createAt)}</div>
-                            {/* <div>좋아요 {comment.recommendCount}</div> */}
+                            <div className={s.recommendIcon}>
+                            {/* { comment.isRecommend ? */}
+                            
+                                <FaHeart
+                                onClick={() => handleCommentRecommend(comment.commentCode)}
+                                style={{color: "#66a1ff", marginRight: "1em", width: "18px", height: "18px", cursor: "pointer"}} 
+                                />
+                                {/* : <FontAwesomeIcon icon={faHeart} 
+                                style={{color: "#66a1ff", marginRight: "1em", width: "20px", height: "20px", cursor: "pointer"}} />
+                            }     */}
+                            </div>
+
+
                             {comment?.user?.userCode === my?.accountCode || my?.accountRole === 'ROLE_ADMIN' ?
                                 <div className={s.deleteBtn} onClick={() => deleteComment(comment.commentCode)}>
                                     <img alt="delete" width={15} src="/deleteIcon.png" />

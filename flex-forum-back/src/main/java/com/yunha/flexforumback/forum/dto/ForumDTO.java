@@ -25,7 +25,8 @@ public class ForumDTO {
 
     private int views;
 
-//    private int recommendCounts; // 추천 개수, 0개를 default로 설정하고싶음
+    private int recommendCounts;    // 추천 개수, 0개를 default로 설정하고싶음
+    private int commentCounts;
 
     private Boolean isRecommend;
 

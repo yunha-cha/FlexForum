@@ -92,12 +92,12 @@ const ForumMain = () => {
                         <div className={s.detailWrap}>
                         <div style={{display: "flex", gap: "5px"}}>
                             <FaHeart style={{color: "#66a1ff", width: "18px", height: "18px"}} />
-                            <div>111</div>
+                            <div>{forum.recommendCounts}</div>
                         </div>
 
                         <div style={{display: "flex", gap: "5px"}}>
                             <FaComment style={{color: "#66a1ff", width: "18px", height: "18px"}} />
-                            <div>11</div>
+                            <div>{forum.commentCounts}</div>
                         </div>
 
                         </div>

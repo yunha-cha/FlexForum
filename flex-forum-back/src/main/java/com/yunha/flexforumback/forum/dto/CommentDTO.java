@@ -15,7 +15,7 @@ public class CommentDTO {
 
     private Long commentCode;
 
-    private UserDTO user;
+    private String userId; // user -> userId
 
     private Long forumCode;
 
@@ -26,4 +26,7 @@ public class CommentDTO {
     private String ipAddress;
 
     private int recommendCount;
+
+//    private Boolean isRecommend;
+
 }

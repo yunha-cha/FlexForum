@@ -1,6 +1,7 @@
 package com.yunha.flexforumback.forum.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.yunha.flexforumback.security.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,23 +24,21 @@ public class ForumRecommend {
     private Long forumRecommendCode;
 
     @JoinColumn(name = "user_code")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     private User user;
 
-//    @JoinColumn(name = "forum_code")
-//    @ManyToOne
-//    private Forum forum;
 
     @JoinColumn(name = "forum_code")
-//    @ManyToOne(fetch = FetchType.LAZY)
-    private Long forumCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
+    private Forum forum;
 
     @Column(name = "recommend_date")
     private LocalDateTime recommendDate;
 
-    public ForumRecommend(User user, Long forumCode, LocalDateTime recommendDate) {
+    public ForumRecommend(User user, Forum forum, LocalDateTime recommendDate) {
         this.user = user;
-        this.forumCode = forumCode;
+        this.forum = forum;
         this.recommendDate = recommendDate;
     }
 }

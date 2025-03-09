@@ -40,9 +40,9 @@ public class ForumController {
 
     /* 게시글 상세 조회 */
     @GetMapping("/forum/{forumCode}")
-    public ResponseEntity<ForumDTO> getForumDetail(@PathVariable Long forumCode){
+    public ResponseEntity<ForumDTO> getForumDetail(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long forumCode){
 
-        return ResponseEntity.ok().body(forumService.getForumDetail(forumCode));
+        return ResponseEntity.ok().body(forumService.getForumDetail(user, forumCode));
 
     }
 
@@ -76,11 +76,11 @@ public class ForumController {
 
     }
 
-    @DeleteMapping("/forum/{forumCode}/recommend")
-    public ResponseEntity<String> removeForumRecommend(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long forumCode){
-
-        return ResponseEntity.ok().body(forumService.removeForumRecommend(user.getUsername(), forumCode));
-    }
+//    @DeleteMapping("/forum/{forumCode}/recommend")
+//    public ResponseEntity<String> removeForumRecommend(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long forumCode){
+//
+//        return ResponseEntity.ok().body(forumService.removeForumRecommend(user.getUsername(), forumCode));
+//    }
 
 
 

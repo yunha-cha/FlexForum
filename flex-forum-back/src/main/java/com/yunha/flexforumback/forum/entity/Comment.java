@@ -1,6 +1,7 @@
 package com.yunha.flexforumback.forum.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.yunha.flexforumback.security.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,8 +31,10 @@ public class Comment {
     @ManyToOne
     private User user;
 
-    @JoinColumn(name = "forum_code")        // manyToOne?
-    private Long forumCode;
+    @JoinColumn(name = "forum_code")
+    @ManyToOne
+    @JsonBackReference
+    private Forum forum;
 
     @Column(name = "content")
     private String content;
@@ -45,9 +48,9 @@ public class Comment {
     @OneToMany(mappedBy = "comment", fetch = FetchType.LAZY)
     private List<CommentRecommend> recommends = new ArrayList<>();
 
-    public Comment(User user, Long forumCode, String content, LocalDateTime createAt, String ipAddress) {
+    public Comment(User user, Forum forum, String content, LocalDateTime createAt, String ipAddress) {
         this.user = user;
-        this.forumCode = forumCode;
+        this.forum = forum;
         this.content = content;
         this.createAt = createAt;
         this.ipAddress = ipAddress;

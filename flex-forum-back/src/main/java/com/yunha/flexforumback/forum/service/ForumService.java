@@ -7,6 +7,7 @@ import com.yunha.flexforumback.forum.entity.Attachment;
 import com.yunha.flexforumback.forum.entity.Forum;
 import com.yunha.flexforumback.forum.entity.ForumRecommend;
 import com.yunha.flexforumback.forum.repository.AttachmentRepository;
+import com.yunha.flexforumback.forum.repository.CommentRepository;
 import com.yunha.flexforumback.forum.repository.ForumRecommendRepository;
 import com.yunha.flexforumback.forum.repository.ForumRepository;
 import com.yunha.flexforumback.security.dto.CustomUserDetails;
@@ -14,6 +15,7 @@ import com.yunha.flexforumback.security.entity.User;
 import com.yunha.flexforumback.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class ForumService {
@@ -35,41 +38,57 @@ public class ForumService {
     private final ForumRepository forumRepository;
     private final UserRepository userRepository;
     private final AttachmentRepository attachmentRepository;
+    private final CommentRepository commentRepository;
 
     private final ForumRecommendRepository forumRecommendRepository;
 
-    public ForumService(Tool tool, ForumRepository forumRepository, UserRepository userRepository, AttachmentRepository attachmentRepository, ForumRecommendRepository forumRecommendRepository) {
+    public ForumService(Tool tool, ForumRepository forumRepository, UserRepository userRepository, AttachmentRepository attachmentRepository, CommentRepository commentRepository, ForumRecommendRepository forumRecommendRepository) {
         this.tool = tool;
         this.forumRepository = forumRepository;
         this.userRepository = userRepository;
         this.attachmentRepository = attachmentRepository;
+        this.commentRepository = commentRepository;
         this.forumRecommendRepository = forumRecommendRepository;
     }
 
 
     public Page<ForumDTO> getForumList(Pageable pageable) {
 
-        Page<ForumDTO> forumList = forumRepository.findAllForumPage(pageable);
+//        Page<Forum> forumPage = forumRepository.findAllForumPage(pageable);
+        Page<ForumDTO> forumPage = forumRepository.findAllForumDTOPage(pageable);
 
-        // repository에서 dto로 변환하여 가져올 경우,
-        // 음 Forum으로 조회하여 count 할 수 없다.
-        // forum으로 조회해서 가져온 count를 setRecommendCount해줘야 한다.
+        // forumDTO.setForumRecommendCounts
+        // forumDTO.setCommentCounts
+        // Page 객체 당 ForumDTO 10개씩 페이징
+        // 다음방법은 N+1 문제 발생(각 N개 추가 쿼리 발생 2N)
+        forumPage.getContent().forEach(forumDTO -> {
+            Long forumCode = forumDTO.getForumCode();
+            forumDTO.setRecommendCounts(forumRecommendRepository.countByForumForumCode(forumCode));     // 10
+            forumDTO.setCommentCounts(commentRepository.countByForumForumCode(forumCode));      // 10
+        });
 
-
-
-//        System.out.println(forumList.getContent());
-        return forumList;
+        return forumPage;
     }
 
 
-    public ForumDTO getForumDetail(Long forumCode) {
-        List<AttachmentDTO> attachmentDTO = attachmentRepository.findAllByForumCode(forumCode);
+    public ForumDTO getForumDetail(CustomUserDetails user, Long forumCode) {
+
+//        User registUser = userRepository.findById(user.getUsername());
+        User registUser = userRepository.getReferenceById(user.getUserCode());      // user 엔티티의 code만 필요한 경우 프록시 객체로 접근 가능
+
         ForumDTO forumDTO = forumRepository.findByForumCode(forumCode);
-
-        forumRecommendRepository.existsBy
-
-
+        List<AttachmentDTO> attachmentDTO = attachmentRepository.findAllByForumCode(forumCode); // 첨부파일 조회
         forumDTO.setFile(attachmentDTO);
+
+        // 특정 게시글의 게시글 좋아요 개수 //
+//        Forum f = forumRepository.findById(forumCode).orElseThrow();
+//        int recommendCount = forumRepository.countByForumCode(forumCode); // 특정 게시글의 게시글 좋아요 개수
+//        forumDTO.setRecommendCounts(f.getForumRecommendList().size()); // countById로
+
+        // 현재 사용자의 게시글좋아요 상태 조회 //
+        Boolean isRecommend = forumRecommendRepository.existsByUserUserCodeAndForumForumCode(registUser.getUserCode(), forumCode);
+        forumDTO.setIsRecommend(isRecommend);
+
         return forumDTO;
     }
 
@@ -148,11 +167,12 @@ public class ForumService {
         forumRepository.incrementViewCount(forumCode);
     }
 
-
+    @Transactional
     public String uploadEditorImg(MultipartFile file) {
         return tool.upload(file);
     }
 
+    @Transactional
     public List<String> uploadAttachment(List<MultipartFile> files) {
         List<String> filePaths = new ArrayList<>();
         for(MultipartFile file : files){
@@ -161,21 +181,31 @@ public class ForumService {
         return filePaths;
     }
 
-    public String registForumRecommend(CustomUserDetails user, Long forumCode) {
-        User registUser = userRepository.findById(user.getUsername());
-        ForumRecommend forumRecommend = new ForumRecommend(registUser, forumCode, LocalDateTime.now());
-        System.out.println("forumRecommend = " + forumRecommend);
-        forumRecommendRepository.save(forumRecommend);
 
+    @Transactional
+    public String registForumRecommend(CustomUserDetails user, Long forumCode) {
+        User registUser = userRepository.getReferenceById(user.getUserCode());
+//        Forum forum = forumRepository.findById(forumCode).orElseThrow();
+//
+//        if(forumRecommendRepository.existsByUserAndForum(registUser, forum)){
+//            forumRecommendRepository.deleteByUserAndForum(registUser, forum);
+//        } else {
+//            ForumRecommend forumRecommend = new ForumRecommend(registUser, forum, LocalDateTime.now());
+//            forumRecommendRepository.save(forumRecommend);
+//        }
+
+
+        // 개선된 코드
+        if (forumRecommendRepository.existsByUserUserCodeAndForumForumCode(registUser.getUserCode(), forumCode)){
+            forumRecommendRepository.deleteByUserUserCodeAndForumForumCode(registUser.getUserCode(), forumCode);
+            System.out.println("게시글 좋아요 삭제");
+        } else {
+            forumRecommendRepository.save(new ForumRecommend(registUser, forumRepository.getReferenceById(forumCode), LocalDateTime.now()));
+            System.out.println("게시글 좋아요 성공");
+
+        }
         return "추천 등록 성공";
     }
 
 
-    public String removeForumRecommend(String userName, Long forumCode) {
-        User registUser = userRepository.findById(userName);
-
-        forumRecommendRepository.deleteByUserAndForumCode(registUser, forumCode);
-        return "삭제 성공";
-
-    }
 }
