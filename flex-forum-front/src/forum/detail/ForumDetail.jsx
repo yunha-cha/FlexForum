@@ -201,16 +201,23 @@ const ForumDetail = () => {
     }
 
 
-    // 댓글 추천하기
-    const handleCommentRecommend = async(commentCode) => {
-        try{
-            await api.post(`/comment/${commentCode}/recommend`);
+    /* 댓글 추천하기 */
+    const handleCommentRecommend = async(recommendCommentCode) => {
 
-        }catch (e) {
+        const res = await api.post(`/comment/${recommendCommentCode}/recommend`);
+        console.log("댓글 추천: ", res.data);
 
-            console.log(e);
-            
-        }
+        // 추천 상태 변경
+        setComments(comments => 
+            comments.map(comment => {
+                if(comment.commentCode == recommendCommentCode){
+                    return {...comment, isRecommend: !comment.isRecommend}
+                } else {
+                    return comment;
+                }
+            })
+        )
+        
 
     }
 
@@ -301,19 +308,21 @@ const ForumDetail = () => {
                 {comments?.map((comment, idx) => (
                     <div className={s.comment} key={idx}>
                         <div className={s.commentHeader}>
-                            <div style={comment?.user?.id === '관리자' ? { color: 'red' } : {}}>{comment?.user?.userId}</div>
+                            <div style={{display: "flex"}}>
+                            <div style={comment?.userId === 'helena' ? { color: 'pink' } : {}}>{comment?.userId}</div>
                             <div style={{ marginLeft: "0.5em", marginRight: "0.5em" }}>•</div>
                             <div className={s.commentDate}> {comment.createAt && formattedDate(comment.createAt)}</div>
+
                             <div className={s.recommendIcon}>
-                            {/* { comment.isRecommend ? */}
-                            
+                            { comment.isRecommend ?
                                 <FaHeart
-                                onClick={() => handleCommentRecommend(comment.commentCode)}
+                                onClick={() => {handleCommentRecommend(comment.commentCode);}}
                                 style={{color: "#66a1ff", marginRight: "1em", width: "18px", height: "18px", cursor: "pointer"}} 
                                 />
-                                {/* : <FontAwesomeIcon icon={faHeart} 
+                            :   <FontAwesomeIcon icon={faHeart} 
+                                onClick={() => {handleCommentRecommend(comment.commentCode);}}
                                 style={{color: "#66a1ff", marginRight: "1em", width: "20px", height: "20px", cursor: "pointer"}} />
-                            }     */}
+                            }     
                             </div>
 
 
@@ -322,6 +331,15 @@ const ForumDetail = () => {
                                     <img alt="delete" width={15} src="/deleteIcon.png" />
                                 </div> : <></>
                             }
+                            </div>
+
+                            <div>
+                            <FaHeart
+                                style={{color: "#66a1ff"}} 
+                                /> {comment.recommendCounts}
+                            </div>
+
+
                         </div>
                         <div className={s.commentContent}>{comment.content}</div>
 

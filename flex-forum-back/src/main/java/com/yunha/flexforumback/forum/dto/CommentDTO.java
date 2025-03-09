@@ -25,8 +25,14 @@ public class CommentDTO {
 
     private String ipAddress;
 
-    private int recommendCount;
+    private int recommendCounts;
 
-//    private Boolean isRecommend;
+    private Boolean isRecommend;
 
+    public CommentDTO(Long commentCode, String userId, String content, LocalDateTime createAt) {
+        this.commentCode = commentCode;
+        this.userId = userId;
+        this.content = content;
+        this.createAt = createAt;
+    }
 }

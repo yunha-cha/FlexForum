@@ -61,11 +61,11 @@ public class ForumService {
         // forumDTO.setCommentCounts
         // Page 객체 당 ForumDTO 10개씩 페이징
         // 다음방법은 N+1 문제 발생(각 N개 추가 쿼리 발생 2N)
-        forumPage.getContent().forEach(forumDTO -> {
+        for (ForumDTO forumDTO : forumPage.getContent()) {
             Long forumCode = forumDTO.getForumCode();
-            forumDTO.setRecommendCounts(forumRecommendRepository.countByForumForumCode(forumCode));     // 10
-            forumDTO.setCommentCounts(commentRepository.countByForumForumCode(forumCode));      // 10
-        });
+            forumDTO.setRecommendCounts(forumRecommendRepository.countByForumForumCode(forumCode));     // 5
+            forumDTO.setCommentCounts(commentRepository.countByForumForumCode(forumCode));      // 5
+        }
 
         return forumPage;
     }
@@ -81,9 +81,7 @@ public class ForumService {
         forumDTO.setFile(attachmentDTO);
 
         // 특정 게시글의 게시글 좋아요 개수 //
-//        Forum f = forumRepository.findById(forumCode).orElseThrow();
-//        int recommendCount = forumRepository.countByForumCode(forumCode); // 특정 게시글의 게시글 좋아요 개수
-//        forumDTO.setRecommendCounts(f.getForumRecommendList().size()); // countById로
+
 
         // 현재 사용자의 게시글좋아요 상태 조회 //
         Boolean isRecommend = forumRecommendRepository.existsByUserUserCodeAndForumForumCode(registUser.getUserCode(), forumCode);
@@ -97,7 +95,6 @@ public class ForumService {
     public String registForum(CustomUserDetails user, ForumDTO forumDTO, String remoteAddr) {
 
         User registUser = userRepository.findById(user.getUsername());
-
         Forum newForum = new Forum(
                 forumDTO.getForumCode(),
                 forumDTO.getTitle(),
@@ -111,6 +108,8 @@ public class ForumService {
 
 
         newForum = forumRepository.save(newForum);
+//        forumRepository.save(newForum);
+
         List<MultipartFile> files = forumDTO.getFiles();
         if(files != null){
             List<Attachment> attachments = new ArrayList<>();
@@ -194,9 +193,9 @@ public class ForumService {
 //            forumRecommendRepository.save(forumRecommend);
 //        }
 
-
         // 개선된 코드
-        if (forumRecommendRepository.existsByUserUserCodeAndForumForumCode(registUser.getUserCode(), forumCode)){
+        Boolean isRecommend = forumRecommendRepository.existsByUserUserCodeAndForumForumCode(registUser.getUserCode(), forumCode);
+        if (isRecommend){
             forumRecommendRepository.deleteByUserUserCodeAndForumForumCode(registUser.getUserCode(), forumCode);
             System.out.println("게시글 좋아요 삭제");
         } else {

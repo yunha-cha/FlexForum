@@ -10,10 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-
-//    @Query("SELECT new com.yunha.flexforumback.forum.dto.CommentDTO(c.commentCode, c.user, c.content, c.createAt) FROM Comment c WHERE c.forumCode = :forumCode")
-    @Query("SELECT c FROM Comment c WHERE c.forum.forumCode = :forumCode")
-    Page<Comment> findAllByForumCode(Pageable pageable, Long forumCode);
+//    @Query("SELECT c FROM Comment c WHERE c.forum.forumCode = :forumCode")
+    @Query("SELECT new com.yunha.flexforumback.forum.dto.CommentDTO(c.commentCode, c.user.id, c.content, c.createAt) FROM Comment c WHERE c.forum.forumCode = :forumCode")
+    Page<CommentDTO> findAllByForumCode(Pageable pageable, Long forumCode);
     @Query("SELECT COUNT(c) FROM Comment c WHERE c.user.userCode=:userCode")
     int getUserWrittenCommentCount(Long userCode);
 

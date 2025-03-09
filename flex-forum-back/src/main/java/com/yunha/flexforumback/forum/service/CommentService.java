@@ -63,46 +63,36 @@ public class CommentService {
 
 
     @Transactional
-    public Page<CommentDTO> getCommentList(Pageable pageable, Long forumCode) {
+    public Page<CommentDTO> getCommentList(CustomUserDetails user, Pageable pageable, Long forumCode) {
 
+        User currentUser = userRepository.getReferenceById(user.getUserCode());
+        Page<CommentDTO> commentDTOPage = commentRepository.findAllByForumCode(pageable, forumCode);
 
-        // jpql
-        // select c from CommentRecommend c where c.comment.user = :user AND c.forum.forumCode = :forumCode
-//        Boolean isRecommend = commentRecommendRepository.existsByUserAndForumCode();
+        // 조회할 때 추천 개수, 자기 자신이 추천했는지 여부 추가
+        for (CommentDTO c : commentDTOPage.getContent()) {      // 댓글 개수 *2 (2N)
+            c.setRecommendCounts(commentRecommendRepository.countByCommentCommentCode(c.getCommentCode()));
+            c.setIsRecommend(commentRecommendRepository.existsByUserUserCodeAndCommentCommentCode(currentUser.getUserCode(), c.getCommentCode()));
+        }
 
-        Page<Comment> commentEntities = commentRepository.findAllByForumCode(pageable, forumCode);
-        List<CommentDTO> comments = commentEntities.getContent().stream().map(c -> new CommentDTO(
-                c.getCommentCode(),
-                c.getUser().getId(), // user엔티티의 모든 필드가 노출되면 안되니까 id만.(userId)
-                c.getForum().getForumCode(),
-                c.getContent(),
-                c.getCreateAt(),
-                c.getIpAddress(),
-                c.getRecommends().size()
-                // 댓글 추천 했는지 안했는지 여부
+        return commentDTOPage;
 
-        )).collect(Collectors.toList());
-        return new PageImpl<>(comments,commentEntities.getPageable(),commentEntities.getTotalElements());
     }
 
 
 
+    /* 댓글좋아요 */
     @Transactional
     public String recommendComment(Long userCode, Long commentCode) {
 
-
         User user = userRepository.getReferenceById(userCode);
         Comment comment = commentRepository.getReferenceById(commentCode);
+        Boolean isRecommend = commentRecommendRepository.existsByUserUserCodeAndCommentCommentCode(user.getUserCode(), comment.getCommentCode());
 
         // 존재 여부 확인 시 추가, 삭제
-        if(commentRecommendRepository.existsByUserAndComment(user, comment)){
-            commentRecommendRepository.deleteByUserAndComment(user, comment);
-            System.out.println("구경금지 = ");
-
-
+        if(isRecommend){
+            commentRecommendRepository.deleteByUserUserCodeAndCommentCommentCode(user.getUserCode(), comment.getCommentCode());
         } else {
             commentRecommendRepository.save(new CommentRecommend(user, comment, LocalDateTime.now()));
-
         }
 
         return "댓글추천";

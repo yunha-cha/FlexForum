@@ -27,10 +27,10 @@ public class CommentController {
     /* 댓글 조회 */
     // 10개씩 보여주는 걸로
     @GetMapping("/{forumCode}")
-    public ResponseEntity<?> getCommentList(@RequestParam int page ,@PathVariable Long forumCode){
+    public ResponseEntity<?> getCommentList(@AuthenticationPrincipal CustomUserDetails user ,@RequestParam int page ,@PathVariable Long forumCode){
 
         Pageable pageable = PageRequest.of(page, 10, Sort.by("createAt").descending());
-        return ResponseEntity.ok().body(commentService.getCommentList(pageable, forumCode));
+        return ResponseEntity.ok().body(commentService.getCommentList(user, pageable, forumCode));
     }
 
 

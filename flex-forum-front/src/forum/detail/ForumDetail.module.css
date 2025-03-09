@@ -178,6 +178,7 @@
 
 .commentHeader{
     display: flex;
+    justify-content: space-between;
     color: rgb(127, 176, 255);
     margin-bottom: 0.7em;
     font-size: 15px;
