@@ -76,12 +76,14 @@ public class ForumController {
 
     }
 
-//    @DeleteMapping("/forum/{forumCode}/recommend")
-//    public ResponseEntity<String> removeForumRecommend(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long forumCode){
-//
-//        return ResponseEntity.ok().body(forumService.removeForumRecommend(user.getUsername(), forumCode));
-//    }
 
+    /* 카테고리 조회 */
+    @GetMapping("/forum/category")
+    public ResponseEntity<?> getCategoryList(){
+
+        return ResponseEntity.ok().body(forumService.getCategoryList());
+
+    }
 
 
     /* 조회수 세기 */

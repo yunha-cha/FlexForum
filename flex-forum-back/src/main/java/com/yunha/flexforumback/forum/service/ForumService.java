@@ -2,20 +2,18 @@ package com.yunha.flexforumback.forum.service;
 
 import com.yunha.flexforumback.common.Tool;
 import com.yunha.flexforumback.forum.dto.AttachmentDTO;
+import com.yunha.flexforumback.forum.dto.CategoryDTO;
 import com.yunha.flexforumback.forum.dto.ForumDTO;
 import com.yunha.flexforumback.forum.entity.Attachment;
+import com.yunha.flexforumback.forum.entity.Category;
 import com.yunha.flexforumback.forum.entity.Forum;
 import com.yunha.flexforumback.forum.entity.ForumRecommend;
-import com.yunha.flexforumback.forum.repository.AttachmentRepository;
-import com.yunha.flexforumback.forum.repository.CommentRepository;
-import com.yunha.flexforumback.forum.repository.ForumRecommendRepository;
-import com.yunha.flexforumback.forum.repository.ForumRepository;
+import com.yunha.flexforumback.forum.repository.*;
 import com.yunha.flexforumback.security.dto.CustomUserDetails;
 import com.yunha.flexforumback.security.entity.User;
 import com.yunha.flexforumback.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 public class ForumService {
@@ -39,15 +36,17 @@ public class ForumService {
     private final UserRepository userRepository;
     private final AttachmentRepository attachmentRepository;
     private final CommentRepository commentRepository;
+    private final CategoryRepository categoryRepository;
 
     private final ForumRecommendRepository forumRecommendRepository;
 
-    public ForumService(Tool tool, ForumRepository forumRepository, UserRepository userRepository, AttachmentRepository attachmentRepository, CommentRepository commentRepository, ForumRecommendRepository forumRecommendRepository) {
+    public ForumService(Tool tool, ForumRepository forumRepository, UserRepository userRepository, AttachmentRepository attachmentRepository, CommentRepository commentRepository, CategoryRepository categoryRepository, ForumRecommendRepository forumRecommendRepository) {
         this.tool = tool;
         this.forumRepository = forumRepository;
         this.userRepository = userRepository;
         this.attachmentRepository = attachmentRepository;
         this.commentRepository = commentRepository;
+        this.categoryRepository = categoryRepository;
         this.forumRecommendRepository = forumRecommendRepository;
     }
 
@@ -207,4 +206,11 @@ public class ForumService {
     }
 
 
+    public List<CategoryDTO> getCategoryList() {
+
+        List<CategoryDTO> categoryList = categoryRepository.findAllCategory();
+
+        return categoryList;
+
+    }
 }
