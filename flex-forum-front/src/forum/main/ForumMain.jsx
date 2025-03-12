@@ -20,22 +20,32 @@ const ForumMain = () => {
     const getForumList = useCallback(async() => {
 
         if (!hasMore) return; // 마지막 페이지 res.data.last = true가 되면 hasMore = false / false이면 함수 빠져나옴
-        
         try{
             const res = await api.get(`/forum?page=${page}`);
             res.data.last && setHasMore(false);
-
             console.log(res.data.content);
-            
-            
+
             setForums((prev) => [...prev, ...res.data.content]); // 기존 데이터에 새로 가져온 데이터를 추가
             setPage((prev) => prev + 1); // 다음 페이지로 이동
 
         } catch (err) {
             console.log(err)
         }
-
     }, [page, hasMore]);
+
+
+
+    /* 카테고리 */
+    const getCategoryList = async() => {
+       const res = await api.get(`/forum/category`);
+       console.log("category: ", res.data);
+
+    }
+
+    useEffect(() => {
+        getCategoryList();
+
+    }, [page])
 
 
 
@@ -117,6 +127,11 @@ const ForumMain = () => {
                 마지막 게시글 입니다!🎄
             </div>
         )}
+
+        </div>
+
+
+        <div className={s.category}>
 
         </div>
 
