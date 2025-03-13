@@ -62,16 +62,13 @@ const ForumCreate = () => {
                 <div className={s.itemTitle}>제목</div>
                 <input name="title" placeholder="" value={newForum.title}
                     onChange={(e) => {
-
                         if (e.target.value.length <= 70) {
                             setNewForum((prev) => ({
                                 ...prev,
                                 title: e.target.value
                             }));
                         }
-
                         setMsg(e.target.value.length > 70);
-
                     }} />
 
                 <div className={s.letterLength}>
@@ -79,10 +76,22 @@ const ForumCreate = () => {
                     <div><span>{newForum.title.length}</span> / 70</div>
                 </div>
             </div>
+                
+
+            <div>
+                <div className={s.itemTitle}>카테고리</div>
+                <select className={s.customDropdown}>
+                    <option>dfdf</option>
+                    <option>dfdf</option>
+                    <option>dfdf</option>
+                </select>
+            </div>
+
+
             <div style={{ marginTop: "2em" ,marginBottom:"1em"}}>
                 <div className={s.itemTitle}>첨부 파일을 업로드 하세요.</div>
                 <label className={s.fileUploadBtn} htmlFor="uploadInput">파일 업로드</label>
-                <input style={{opacity:0}} type="file" id="uploadInput" name="files" multiple onChange={(e) => {
+                <input style={{opacity:0, width:0, padding:0}} type="file" id="uploadInput" name="files" multiple onChange={(e) => {
                     setUploadFiles((p)=>[...p, ...Array.from(e.target.files)]);
                 }
                 } />

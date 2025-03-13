@@ -10,10 +10,11 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ForumRepository extends JpaRepository<Forum, Long> {
 
-    @Query("SELECT f FROM Forum f")
-    Page<Forum> findAllForumPage(Pageable pageable);
 
-    @Query("SELECT new com.yunha.flexforumback.forum.dto.ForumDTO(f.forumCode, f.title, f.content, f.user.id, f.createAt, f.views) FROM Forum f")
+    @Query("SELECT new com.yunha.flexforumback.forum.dto.ForumDTO(f.forumCode, f.title, f.content, f.user.id, f.createAt, f.views, f.categoryCode) FROM Forum f WHERE f.categoryCode = :categoryCode")
+    Page<ForumDTO> findByCategoryCodeForumDTOPage(Pageable pageable, Long categoryCode);
+
+    @Query("SELECT new com.yunha.flexforumback.forum.dto.ForumDTO(f.forumCode, f.title, f.content, f.user.id, f.createAt, f.views, f.categoryCode) FROM Forum f")
     Page<ForumDTO> findAllForumDTOPage(Pageable pageable);
 
     @Query("SELECT new com.yunha.flexforumback.forum.dto.ForumDTO(f.title, f.content, f.user.id, f.createAt, f.views) FROM Forum f WHERE f.forumCode = :forumCode")
@@ -25,4 +26,6 @@ public interface ForumRepository extends JpaRepository<Forum, Long> {
 
     @Query("SELECT COUNT(f) FROM Forum f WHERE f.user.userCode=:userCode")
     int getUserWrittenPostCount(Long userCode);
+
+
 }

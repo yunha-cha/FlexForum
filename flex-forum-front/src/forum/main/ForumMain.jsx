@@ -10,10 +10,20 @@ import { FaComment, FaHeart } from "react-icons/fa";
 const ForumMain = () => {
     const nav = useNavigate();
 
+    // virtual dom 진짜 dom 비교 연산
+    // 렌더링 조건
+    // 1. useState가 바뀔 때 바꿔치기
+    // 2. 부모 컴포넌트의 props 바뀌면 자식들도 리렌더링
+    // 
+
     const [forums, setForums] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(1);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true); // 더 불러올 데이터가 있는지 여부
     const loader = useRef(null);
+
+    const [categorys, setCategorys] = useState([]);
+    
 
 
     //게시글 가져오기
@@ -33,19 +43,35 @@ const ForumMain = () => {
         }
     }, [page, hasMore]);
 
+    
+
+    // 카테고리에 따른 게시글들 가져오기
+    const handleForums = (categoryCode) => {
+        
+        console.log("categoryCode: ", categoryCode);
+        
+
+        // 불가능, 왜냐하면 페이징을 했기 때문에, 페이징으로 5개씩 가져오기 때문에 set해도 5개밖에 세팅안됨
+        // 서버에 계속 페이지를 요청해야 하니까 안된다.
+        // if(categoryCode !== null){  
+        //     setForums(forums => forums.filter(forum => forum.categoryCode === categoryCode))
+        // }
+
+    }
+
 
 
     /* 카테고리 */
     const getCategoryList = async() => {
        const res = await api.get(`/forum/category`);
-       console.log("category: ", res.data);
+       setCategorys(res.data);
 
     }
 
     useEffect(() => {
         getCategoryList();
 
-    }, [page])
+    }, [])
 
 
 
@@ -78,9 +104,11 @@ const ForumMain = () => {
     return <div className={s.container}>
         <GoToTopButton/>
         <WritePostButton/>
-      <h2 id="forumTitle">자유 게시판</h2>
-        <div className={s.forum}>
-            
+
+        <div className={s.mainContainer}>
+
+        <div className={s.forumContainer}>
+        <h2 id="forumTitle">자유 게시판</h2>
         {forums.map((forum, idx) => {
 
             return(
@@ -131,7 +159,15 @@ const ForumMain = () => {
         </div>
 
 
-        <div className={s.category}>
+        <div className={s.categoryContainer}>
+            {categorys.map((category) => 
+                <div className={s.category}
+                     onClick={() => setSelectedCategory(category.categoryCode)}>
+                    {category.name}
+                </div>
+            )
+            }
+        </div>
 
         </div>
 

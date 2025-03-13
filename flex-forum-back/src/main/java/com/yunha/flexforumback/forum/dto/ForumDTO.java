@@ -21,6 +21,8 @@ public class ForumDTO {
 
     private String userId;
 
+    private Long categoryCode;
+
     private LocalDateTime createAt;
 
     private int views;
@@ -40,13 +42,14 @@ public class ForumDTO {
 
 
     // 전체 조회
-    public ForumDTO(Long forumCode, String title, String content,String userId, LocalDateTime createAt, int views) {
+    public ForumDTO(Long forumCode, String title, String content,String userId, LocalDateTime createAt, int views, Long categoryCode) {
         this.forumCode = forumCode;
         this.title = title;
         this.content = content;
         this.userId = userId;
         this.createAt = createAt;
-        this.views = views;;
+        this.views = views;
+        this.categoryCode = categoryCode;
     }
 
     // 상세 조회

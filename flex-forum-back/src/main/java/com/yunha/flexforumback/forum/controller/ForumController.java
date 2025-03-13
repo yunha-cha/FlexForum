@@ -28,11 +28,11 @@ public class ForumController {
 
     /* 게시글 조회 페이징 */
     @GetMapping("/forum")
-    public ResponseEntity<Page<ForumDTO>> getForumList(@RequestParam int page){
+    public ResponseEntity<Page<ForumDTO>> getForumList(@RequestParam int page, @RequestParam(required = false) Long categoryCode){
 
         Pageable pageable = PageRequest.of(page, 5, Sort.by("createAt").descending());
 
-        Page<ForumDTO> forumList = forumService.getForumList(pageable);
+        Page<ForumDTO> forumList = forumService.getForumList(pageable, categoryCode);
         return ResponseEntity.ok().body(forumList);
     }
 

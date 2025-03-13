@@ -29,9 +29,13 @@ public class Forum {
     @Column(name = "content")
     private String content;
 
-    @JoinColumn(name = "user_code")
+
     @ManyToOne
+    @JoinColumn(name = "user_code")
     private User user;      // Long userCode로 대공사
+
+     // category vs categoryCode
+    private Long categoryCode;
 
     @OneToMany(mappedBy = "forum", fetch = FetchType.LAZY)
     private List<Comment> commentList;

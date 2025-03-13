@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -51,10 +52,14 @@ public class ForumService {
     }
 
 
-    public Page<ForumDTO> getForumList(Pageable pageable) {
+    public Page<ForumDTO> getForumList(Pageable pageable, Long categoryCode) {
 
-//        Page<Forum> forumPage = forumRepository.findAllForumPage(pageable);
-        Page<ForumDTO> forumPage = forumRepository.findAllForumDTOPage(pageable);
+        Page<ForumDTO> forumPage;
+        if(categoryCode != null){
+            forumPage = forumRepository.findByCategoryCodeForumDTOPage(pageable, categoryCode);
+        } else {
+            forumPage = forumRepository.findAllForumDTOPage(pageable);
+        }
 
         // forumDTO.setForumRecommendCounts
         // forumDTO.setCommentCounts
@@ -93,7 +98,7 @@ public class ForumService {
     @Transactional
     public String registForum(CustomUserDetails user, ForumDTO forumDTO, String remoteAddr) {
 
-        User registUser = userRepository.findById(user.getUsername());
+        User registUser = userRepository.getReferenceById(user.getUserCode());
         Forum newForum = new Forum(
                 forumDTO.getForumCode(),
                 forumDTO.getTitle(),
